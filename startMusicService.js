@@ -16,17 +16,60 @@ function findDeviceId(hardwareData, miDid) {
 }
 
 /**
- * 调用音乐搜索接口，返回音频 URL
- * 接口约定：GET apiUrl?musicName=歌名 → { "data": { "url": "https://xxx.mp3" } }
+ * 调用音乐搜索接口，返回 { url, duration } 列表
+ * 接口约定：GET apiUrl?musicName=歌名
+ *   data 为数组 → [{ url, duration }, ...]
+ *   data 为对象 → [{ url, duration }]
  */
 async function searchMusic(apiUrl, musicName) {
   const url = new URL(apiUrl);
   url.searchParams.set("musicName", musicName);
   const res = await fetch(url.href);
-  const data = await res.json();
-  const audioUrl = data.url || (data.data && data.data.url);
-  if (!audioUrl) throw new Error("接口未返回音频地址: " + JSON.stringify(data));
-  return audioUrl;
+  const json = await res.json();
+
+  // 接口返回列表
+  if (Array.isArray(json.data)) {
+    return json.data
+      .filter((item) => item.url)
+      .map((item) => ({
+        url: item.url,
+        duration: (item.duration || 180000) / 1000,
+      }));
+  }
+  // 接口返回单条
+  const audioUrl = json.url || (json.data && json.data.url);
+  const duration = (json.data && json.data.duration) || 180000;
+  if (!audioUrl)
+    throw new Error("接口未返回音频地址: " + JSON.stringify(json));
+  return [{ url: audioUrl, duration: duration / 1000 }];
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * 批量播放音乐列表
+ * @param {import('./src/minaservice')} mina
+ * @param {string} deviceId
+ * @param {{ url: string, duration: number }[]} tracks
+ */
+async function playList(mina, deviceId, tracks) {
+  if (!tracks.length) return;
+
+  await mina.player_set_loop(deviceId, 1);
+
+  for (let i = 0; i < tracks.length; i++) {
+    const { url, duration } = tracks[i];
+    console.log(
+      `[${i + 1}/${tracks.length}] 🎶 播放: ${url} (${Math.round(duration)}s)`
+    );
+    await mina.play_by_url(deviceId, url);
+    await sleep(duration * 1000);
+  }
+
+  await mina.player_stop(deviceId);
+  console.log("播放列表完毕");
 }
 
 async function main() {
@@ -37,7 +80,8 @@ async function main() {
   }
 
   // 轮询间隔：命令行参数 > .env POLL_INTERVAL > 默认 2000ms
-  const interval = parseInt(process.argv[2]) || parseInt(env.POLL_INTERVAL) || 2000;
+  const interval =
+    parseInt(process.argv[2]) || parseInt(env.POLL_INTERVAL) || 2000;
 
   // 登录小米账号（优先 .env 中的 MI_PASS_TOKEN，失败时提示手动输入）
   const account = await createAccount(TOKEN_PATH);
@@ -68,19 +112,22 @@ async function main() {
   listener.on("music", async (msg) => {
     const time = new Date(msg.timestamp).toLocaleTimeString();
     const action =
-      msg.command === "play" ? `🎵 搜索: ${msg.songName}` :
-      msg.command === "prev" ? "⏮ 上一曲" : "⏭ 下一曲";
+      msg.command === "play"
+        ? `🎵 搜索: ${msg.songName}`
+        : msg.command === "prev"
+          ? "⏮ 上一曲"
+          : "⏭ 下一曲";
     console.log(`[${time}] ${action}`);
     console.log(`[${time}] 原文: ${msg.question}`);
 
-    // 播放音乐
+    // 播放音乐（支持播放列表）
     if (msg.command === "play" && msg.songName && musicApi) {
       try {
         await mina.stop_tts(deviceId);
         console.log(`🔍 正在搜索: ${msg.songName}`);
-        const audioUrl = await searchMusic(musicApi, msg.songName);
-        await mina.play_by_url(deviceId, audioUrl);
-        console.log(`🎶 播放: ${audioUrl}`);
+        const tracks = await searchMusic(musicApi, msg.songName);
+        console.log(`📋 获取到 ${tracks.length} 个音频`);
+        await playList(mina, deviceId, tracks);
       } catch (e) {
         console.error(`❌ 搜索失败: ${e.message}`);
       }
@@ -102,7 +149,7 @@ async function main() {
 
   // 启动（会自动初始化 hardware，首次拉取基线消息）
   listener.on("start", () => {
-    console.log("监听已启动，试试对音箱说: 我想听周杰伦的晴天\n");
+    console.log("监听已启动，试试对音箱说: 我想听隐形的翅膀\n");
   });
 
   listener.start();
