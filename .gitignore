@@ -1,0 +1,4 @@
+/.env
+/.claude/
+/.mi.token
+/node_modules/

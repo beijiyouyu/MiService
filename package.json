@@ -1,0 +1,25 @@
+{
+  "name": "miservice-node",
+  "version": "2.9.3",
+  "description": "XiaoMi Cloud Service Node.js port from Python version",
+  "main": "src/index.js",
+  "bin": {
+    "micli": "./bin/micli.js"
+  },
+  "scripts": {
+    "start": "node bin/micli.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "xiaomi",
+    "miot",
+    "miaccount",
+    "mina"
+  ],
+  "author": "Yonsm, yihong0618",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "17.4.2",
+    "random-useragent": "0.5.0"
+  }
+}
