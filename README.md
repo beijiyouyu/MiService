@@ -579,3 +579,8 @@ listener.stop();
 - 加密使用 Node.js 内置 `crypto` 模块（MD5/SHA1/SHA256/HMAC-SHA256/RC4）
 - 小米 API 返回的 `nonce` 为大整数，从原始 JSON 文本提取字符串避免精度丢失
 - 重定向链中的 cookies 自动累积，确保 `serviceToken` 正确获取
+
+## 更新发行npm包
+```
+npm publish --access public
+```

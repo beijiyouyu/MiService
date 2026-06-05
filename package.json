@@ -1,6 +1,6 @@
 {
   "name": "@bjyy/miservice",
-  "version": "2.9.3",
+  "version": "2.9.4",
   "description": "XiaoMi Cloud Service Node.js client - control Xiaomi IoT devices and XiaoAi speakers",
   "main": "src/index.js",
   "bin": {
