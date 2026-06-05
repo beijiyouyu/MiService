@@ -1,6 +1,6 @@
 {
   "name": "@bjyy/miservice",
-  "version": "2.9.4",
+  "version": "1.1.1",
   "description": "XiaoMi Cloud Service Node.js client - control Xiaomi IoT devices and XiaoAi speakers",
   "main": "src/index.js",
   "bin": {
@@ -32,7 +32,7 @@
     "smart-home",
     "iot"
   ],
-  "author": "Yonsm, yihong0618",
+  "author": "beijiyouyu",
   "license": "MIT",
   "engines": {
     "node": ">=14.0.0"
