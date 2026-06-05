@@ -1,23 +1,42 @@
 {
-  "name": "miservice-node",
+  "name": "@bjyy/miservice",
   "version": "2.9.3",
-  "description": "XiaoMi Cloud Service Node.js port from Python version",
+  "description": "XiaoMi Cloud Service Node.js client - control Xiaomi IoT devices and XiaoAi speakers",
   "main": "src/index.js",
   "bin": {
-    "micli": "./bin/micli.js"
+    "miservice": "bin/micli.js"
   },
+  "files": [
+    "src",
+    "bin",
+    "LICENSE"
+  ],
   "scripts": {
     "start": "node bin/micli.js",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/beijiyouyu/MiService.git"
+  },
+  "homepage": "https://github.com/beijiyouyu/MiService#readme",
+  "bugs": {
+    "url": "https://github.com/beijiyouyu/MiService/issues"
   },
   "keywords": [
     "xiaomi",
     "miot",
     "miaccount",
-    "mina"
+    "mina",
+    "xiaoai",
+    "smart-home",
+    "iot"
   ],
   "author": "Yonsm, yihong0618",
   "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "dependencies": {
     "dotenv": "17.4.2",
     "random-useragent": "0.5.0"
